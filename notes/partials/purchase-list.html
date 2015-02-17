@@ -1,0 +1,92 @@
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Заказ счёта</h1>
+    </div>
+</div>
+
+<div class="row" ng-show="isServerError">
+    <div class="col-lg-6">
+        <server-error-alert></server-error-alert>
+    </div>
+</div>
+
+<span ng-if="currentUser" us-spinner spinner-key="elements-spinner" spinner-start-active="true"></span>
+<span ng-if="!currentUser" us-spinner spinner-key="elements-spinner"></span>
+
+<div ng-show="isElementsLoaded && !isThereNoElements && !isServerError && elements.length > 0">
+    <div class="row">
+        <div class="col-lg-12">
+            <table class="table table-hover table-responsive">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Номер</th>
+                        <th>Название</th>
+                        <th>Цена, руб.</th>
+                        <th>Пользователей</th>
+                        <th>Скидка, руб.</th>
+                        <th>Количество месяцев</th>
+                        <th>Сумма, руб.</th>
+                    <tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="element in elements">
+                        <td><input type="checkbox" name="checked-services" ng-model="element.isChecked" ng-change="refreshPayment(element)"/></td>
+                        <td>{{element.ID}}</td>
+                        <td>{{element.TariffPlan}}</td>
+                        <td>{{element.Amount}}</td>
+                        <td>{{element.CountUsers}}</td>
+                        <td>{{element.Discount}}</td>
+                        <td>
+                            <input type="number" class="form-control regular-thin" min="1" ng-model="element.Payment" ng-init="element.Payment = 1" ng-disabled="!element.isChecked"/>
+                        </td>
+                        <td>{{element.Check = element.Amount * element.Payment || 0}}</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="9">
+                            <strong class="pull-right">Итого: {{elements | filter: {isChecked : true} | sumUpByProperty : 'Check' }} руб.</strong>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <div class="row regular-footer-margin">
+        <div class="col-lg-12">
+            <div class="row">
+                <div class="col-lg-12">
+                    <hr class="regular-footer-margin">
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-6">
+                    <button ng-show="isServicesPurchased" type="submit" class="btn btn-primary" ng-click="sendServicesPurchaseRequest(getCheckedRows())" ng-disabled="(elements | sumUpByProperty : 'Check') == 0 || (elements | countByTrueProperty : 'isChecked') == 0">
+                        <i class="fa fa-send"></i> Отправить заявку на формирование счетов
+                    </button>
+                    <button ng-show="!isServicesPurchased" type="submit" class="btn btn-warning" disabled>
+                        <i class="fa fa-gear fa-spin"></i> Отправить заявку на формирование счетов
+                    </button>
+
+                    <button type="submit" class="btn btn-primary" disabled>
+                        <i class="fa fa-credit-card"></i> Оплатить
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row" ng-show="isPurchaseServerError || isPurchaseServerSuccess">
+        <div class="col-lg-6">
+            <p class="alert alert-danger" ng-show="isPurchaseServerError">
+                На сервере произошла ошибка при отправке заявки на формирование счётов.
+            </p>
+            <p class="alert alert-success" ng-show="isPurchaseServerSuccess">
+                Заявка на формирование счётов успешно отправлена.
+            </p>
+        </div>
+    </div>
+</div>

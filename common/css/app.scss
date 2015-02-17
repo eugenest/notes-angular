@@ -1,0 +1,94 @@
+$regularMargin: 12px;
+
+#side-menu .active {
+  background-color: rgba(255, 255, 255, 1);
+}
+
+.bold-text {
+  font-weight: bold;
+}
+
+.row-clickable {
+  cursor: pointer;
+}
+
+.registration-link {
+  margin-top: 8px;
+}
+
+.news-preview-img {
+  margin: 0 $regularMargin 8px 0;
+}
+
+.news-detail-img {
+  margin: 0 $regularMargin $regularMargin 0;
+}
+
+.star-required {
+  color: rgba(255, 0, 0, 1);
+}
+
+.common-pair span:first-child {
+  font-weight: bold;
+}
+
+.service-object-row, .maintaining-objects {
+  margin-bottom: $regularMargin;
+}
+
+.second-col {
+  width: 50%;
+}
+
+.price-cell {
+  text-align: right;
+}
+
+.expired-service {
+  color: rgba(255, 0, 0, 0.8);
+  cursor: help;
+}
+
+div[date-picker-wrapper] {
+  width: 220px; /*excellent for russian locale*/
+}
+div[date-picker-wrapper] [date-picker] td,
+div[date-picker-wrapper] [date-picker] th {
+  width: auto;
+}
+
+.date-filter-label{
+  font-size: 100%;
+}
+
+.primary-service td {
+  font-weight: bold;
+}
+
+td > input[type="number"] {
+  width: 80px;
+}
+
+.regular-footer-margin {
+  margin-bottom: 2*$regularMargin;
+}
+
+.regular-right-margin {
+  margin-right: $regularMargin;
+}
+
+.regular-thin {
+  width: 5*$regularMargin !important;
+}
+
+.inline {
+  display: inline-block;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.input-group-addon i {
+  width: 8px;
+}

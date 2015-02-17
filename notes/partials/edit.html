@@ -1,0 +1,162 @@
+<div class="row">
+    <div class="col-lg-12">
+        <div ng-switch on="location">
+            <div ng-switch-when="/rent-1c/add">
+                <h1 class="page-header">Добавление услуги</h1>
+            </div>
+            <div ng-switch-default>
+                <h1 class="page-header">Изменение услуги</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" ng-show="elements.length == 0 || isThereNoElements">
+    <div class="col-lg-12">
+        <p class="alert alert-info">
+            Услуга не найдена.
+        </p>
+    </div>
+</div>
+
+<div class="row" ng-show="isServerError">
+    <div class="col-lg-12">
+        <server-error-alert></server-error-alert>
+    </div>
+</div>
+
+<div class="row" ng-show="isServicesServerError">
+    <div class="col-lg-12">
+        <p class="alert alert-danger">
+            На сервере произошла ошибка при выгрузке продуктов.
+        </p>
+    </div>
+</div>
+
+<span ng-if="currentUser" us-spinner spinner-key="elements-spinner" spinner-start-active="true"></span>
+<span ng-if="!currentUser" us-spinner spinner-key="elements-spinner"></span>
+
+<div ng-show="isElementsLoaded && !isThereNoElements && !isServerError && elements.length > 0">
+    <div class="row">
+        <div class="col-lg-6 col-md-12">
+            <h3>
+                {{element.ID}} : {{element.TariffPlan}} <span ng-bind-html="element.Status | rent1c_service_status"></span>
+            </h3>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-6 col-md-12">
+            <h4>Тарифный план</h4>
+
+            <table class="table table-hover table-responsive">
+                <thead>
+                    <tr>
+                        <th>Номер</th>
+                        <th>Тариф</th>
+                        <th>Цена, руб.</th>
+                        <th>Пользователей</th>
+                        <th>Скидка, руб.</th>
+                        <th>Сумма, руб.</th>
+                    <tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{TariffPlan.ID || '000000'}}</td>
+                        <td>
+                            <select class="form-control" ng-options="tariff as tariff.Name for tariff in tariffs" ng-model="TariffPlan">
+                            </select>
+                        </td>
+                        <td>{{element.Price = TariffPlan.Price || 0}}</td>
+                        <td>
+                            <input type="number" class="form-control" ng-model="element.CountUsers" min="1" />
+                        </td>
+                        <td>{{element.Discount}}</td>
+                        <td>{{element.CountUsers * element.Price - element.Discount || "0"}}</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="6">
+                            <strong class="pull-right">Итого: {{element.CountUsers * element.Price - element.Discount || "0"}} руб.</strong>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-6 col-md-12">
+            <h4>Параметры</h4>
+            <table class="table table-hover table-responsive">
+                <thead>
+                    <tr>
+                        <th>Номер</th>
+                        <th>Название</th>
+                        <th>Пользователей</th>
+                        <th>Цена, руб.</th>
+                        <th>Сумма, руб.</th>
+                        <th></th>
+                    <tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="subElement in element.ServicesList.List track by $index">
+                        <td>{{subElement.ID}}</td>
+                        <td>{{subElement.Name}}</td>
+                        <td><input type="number" class="form-control" ng-model="subElement.CountUsers" min="0" max="{{element.CountUsers}}"/></td>
+                        <td>{{subElement.Price}}</td>
+                        <td>{{subElement.Amount = subElement.CountUsers * subElement.Price}}</td>
+                        <td>
+                            <button type="button" class="btn btn-danger" ng-click="element.ServicesList.List.splice($index, 1);"><i class="fa fa-minus-circle"></i></button>
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="5">
+                        <select class="form-control" ng-options="service.Name + ' : ' + service.Price + ' руб.' for service in services" ng-model="serviceToAdd">
+                            <option value="">-- Выберите параметр --</option>
+                        </select>
+                        <td>
+                            <button type="button" class="btn btn-success" ng-click="addServiceObjectRow(serviceToAdd)" ng-disabled="!serviceToAdd"><i class="fa fa-plus-circle"></i></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="6">
+                            <strong class="pull-right">Итого: {{ element.ServicesList.List | totalSumPriceQty : 'Price' : 'CountUsers' || "0"}} руб.</strong>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <div class="row regular-footer-margin">
+        <div class="col-lg-6 col-md-12">
+            <hr class="regular-footer-margin">
+
+            <button ng-show="isServiceEdited" type="submit" class="btn btn-primary pull-left" ng-click="sendServiceChangeRequest()">
+                <i class="fa fa-send"></i> Отправить заявку на изменение услуги
+            </button>
+            <button ng-show="!isServiceEdited" type="submit" class="btn btn-warning pull-left" disabled>
+                <i class="fa fa-gear fa-spin"></i> Отправить заявку на изменение услуги
+            </button>
+
+            <h4 class="pull-right">
+                <strong>Итого: {{ (element.Amount = (element.ServicesList.List | totalSumPriceQty : 'Price' : 'CountUsers') + (element.CountUsers * element.Price - element.Discount)) || "0" }} руб.</strong>
+            </h4>
+        </div>
+    </div>
+
+    <div class="row" ng-show="isEditServerError || isEditServerSuccess">
+        <div class="col-lg-6 col-md-12">
+            <p class="alert alert-danger" ng-show="isEditServerError">
+                На сервере произошла ошибка при отправке заявки на изменение услуги.
+            </p>
+            <p class="alert alert-success" ng-show="isEditServerSuccess">
+                Заявка на изменение услуги успешно отправлена.
+            </p>
+        </div>
+    </div>
+</div>

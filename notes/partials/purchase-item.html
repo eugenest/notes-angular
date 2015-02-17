@@ -1,0 +1,142 @@
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Заказ счёта</h1>
+    </div>
+</div>
+
+<div class="row" ng-show="elements.length == 0 || isThereNoElements">
+    <div class="col-lg-12">
+        <p class="alert alert-info">
+            Услуга не найдена.
+        </p>
+    </div>
+</div>
+
+<div class="row" ng-show="isServerError">
+    <div class="col-lg-6 col-md-12">
+        <server-error-alert></server-error-alert>
+    </div>
+</div>
+
+<span ng-if="currentUser" us-spinner spinner-key="elements-spinner" spinner-start-active="true"></span>
+<span ng-if="!currentUser" us-spinner spinner-key="elements-spinner"></span>
+
+<div ng-show="isElementsLoaded && !isThereNoElements && !isServerError && elements.length > 0">
+    <div class="row">
+        <div class="col-lg-6 col-md-12 regular-footer-margin">
+            <h3>
+                {{element.ID}} : {{element.TariffPlan}} <span ng-bind-html="element.Status | rent1c_service_status"></span>
+            </h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6 col-md-12">
+            <h4>
+                Тарифный план
+            </h4>
+        
+            <table class="table table-hover table-responsive">
+                <thead>
+                    <tr>
+                        <th>Номер</th>
+                        <th>Тариф</th>
+                        <th>Цена, руб</th>
+                        <th>Пользователей</th>
+                        <th>Скидка, руб</th>
+                        <th>Сумма, руб</th>
+                    <tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{TariffPlan.ID}}</td>
+                        <td>{{element.TariffPlan}}</td>
+                        <td>{{element.Price}}</td>
+                        <td>{{element.CountUsers}}</td>
+                        <td>{{element.Discount}}</td>
+                        <td>{{element.CountUsers * element.Price - element.Discount || "0"}}</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="6">
+                            <strong class="pull-right">Итого: {{element.CountUsers * element.Price - element.Discount || "0"}} руб.</strong>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6 col-md-12">
+            <h4>
+                Параметры
+            </h4>
+
+            <table class="table table-hover table-responsive">
+                <thead>
+                    <tr>
+                        <th>Номер</th>
+                        <th>Название</th>
+                        <th>Пользователей</th>
+                        <th>Цена, руб.</th>
+                        <th>Сумма, руб.</th>
+                    <tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="subElement in element.ServicesList.List">
+                        <td>{{subElement.ID}}</td>
+                        <td>{{subElement.Name}}</td>
+                        <td>{{subElement.CountUsers}}</td>
+                        <td>{{subElement.Price}}</td>
+                        <td>{{subElement.Amount}}</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="6">
+                            <strong class="pull-right">Итого: {{ element.ServicesList.List | totalSumPriceQty : 'Price' : 'CountUsers' || "0"}} руб.</strong>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <div class="row regular-footer-margin">
+        <form class="form-inline col-lg-6 col-md-12">
+          <div class="form-group">
+            <span>Заплатить за </span><input type="number" class="form-control regular-thin inline" min="1" ng-model="element.Payment" /> месяцев * <strong>{{ (element.Amount = (element.ServicesList.List | totalSumPriceQty : 'Price' : 'CountUsers') + (element.CountUsers * element.Price - element.Discount)) || 0 }} руб.</strong> = <strong>{{element.Check = element.Payment * element.Amount || 0}} руб.</strong></span>
+          </div>
+        </form>
+    </div>
+
+    <div class="row regular-footer-margin">
+        <div class="col-lg-6 col-md-12">
+            <hr class="regular-footer-margin">
+    
+            <button ng-show="isServicePurchased" type="submit" class="btn btn-primary" ng-click="sendServicePurchaseRequest()" ng-disabled="!element.Payment">
+                <i class="fa fa-send"></i> Отправить заявку на формирование счёта
+            </button>
+            <button ng-show="!isServicePurchased" type="submit" class="btn btn-warning" disabled>
+                <i class="fa fa-gear fa-spin"></i> Отправить заявку на формирование счёта
+            </button>
+
+            <button type="submit" class="btn btn-primary" disabled>
+                <i class="fa fa-credit-card"></i> Оплатить
+            </button>
+        </div>
+    </div>
+
+    <div class="row" ng-show="isPurchaseServerError || isPurchaseServerSuccess">
+        <div class="col-lg-6 col-md-12">
+            <p class="alert alert-danger" ng-show="isPurchaseServerError">
+                На сервере произошла ошибка при отправке заявки на формирование счёта.
+            </p>
+            <p class="alert alert-success" ng-show="isPurchaseServerSuccess">
+                Заявка на формирование счёта успешно отправлена.
+            </p>
+        </div>
+    </div>
+</div>
