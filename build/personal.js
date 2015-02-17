@@ -15,6 +15,7 @@ app.config(['$routeProvider', function($routeProvider) {
     $routeProvider.when('/notes/add', {templateUrl: 'notes/partials/add.html', controller: 'NotesAddCtrl'});
     $routeProvider.when('/notes/:id', {templateUrl: 'notes/partials/detail.html', controller: 'NotesDetailCtrl'});
     $routeProvider.when('/notes/:id/edit', {templateUrl: 'notes/partials/edit.html', controller: 'NotesEditCtrl'});
+    $routeProvider.when('/notes/:id/mail', {templateUrl: 'notes/partials/mail.html', controller: 'NotesMailCtrl'});
 
     $routeProvider.when('/404', {templateUrl: 'common/partials/404.html', controller: '404Ctrl'});
 
@@ -105,6 +106,27 @@ appControllers.controller('NotesCtrl', ['$scope', 'Notes', 'paginationConfig', '
             
         }); 
     }
+    
+    $scope.getCSV = function(id) {
+        Notes.csv(id).success(function(response){
+            /*var file = new Blob([response], {type: 'text/csv'}); //blocks by browser
+            var fileURL = URL.createObjectURL(file);
+            window.open(fileURL);*/
+            
+            var a = document.createElement("a");
+            document.body.appendChild(a);
+            a.style = "display: none";
+            var blob = new Blob([response], {type: 'text/csv'});
+            var url = window.URL.createObjectURL(blob);
+            a.href = url;
+            a.download = 'note_'+id+'.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+        }).error(function(){
+            
+        }); 
+    }
 }]);
 
 appControllers.controller('NotesDetailCtrl', ['$scope', 'Notes', 'paginationConfig', '$location', '$routeParams', 'usSpinnerService', '$filter', function($scope, Notes, paginationConfig, $location, $routeParams, usSpinnerService, $filter) {
@@ -136,6 +158,27 @@ appControllers.controller('NotesDetailCtrl', ['$scope', 'Notes', 'paginationConf
     $scope.deleteNote = function(id) {
         Notes.delete(id).success(function(){
             $location.path('/notes', false);
+        }).error(function(){
+            
+        }); 
+    }
+    
+    $scope.getCSV = function(id) {
+        Notes.csv(id).success(function(response){
+            /*var file = new Blob([response], {type: 'text/csv'}); //blocks by browser
+            var fileURL = URL.createObjectURL(file);
+            window.open(fileURL);*/
+            
+            var a = document.createElement("a");
+            document.body.appendChild(a);
+            a.style = "display: none";
+            var blob = new Blob([response], {type: 'text/csv'});
+            var url = window.URL.createObjectURL(blob);
+            a.href = url;
+            a.download = 'note_'+id+'.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
         }).error(function(){
             
         }); 
@@ -200,6 +243,24 @@ appControllers.controller('NotesEditCtrl', ['$scope', 'Notes', 'paginationConfig
         }); 
     }
 }]);
+
+appControllers.controller('NotesMailCtrl', ['$scope', '$routeParams', 'Notes', 'paginationConfig', '$rootScope', '$location', 'usSpinnerService', function($scope, $routeParams, Notes, paginationConfig, $rootScope, $location, usSpinnerService) {
+    $scope.isNoteSended = true;
+     
+    $scope.sendNote = function() {
+        $scope.isNoteSended = false;
+        $scope.isNoteSendServerError = false;
+        $scope.isNoteSendServerSuccess = false;
+        Notes.mail({id: $routeParams.id, email: $scope.email}).success(function(){
+            $scope.isNoteSendServerSuccess = true;
+        }).error(function(){
+            $scope.isNoteSendServerError = true;
+        }).finally(function(){
+            $scope.isNoteSended = true;
+            $scope.element = null;
+        }); 
+    }
+}]);
 appServices.factory('Notes', function($http){
     return {
         getAll: function(){return $http.get('http://notes.eugenes.koding.io/web/note/');},
@@ -207,7 +268,7 @@ appServices.factory('Notes', function($http){
         add: function (request) {return $http.post('http://notes.eugenes.koding.io/web/notes', request);},
         edit: function (request) {return $http.put('http://notes.eugenes.koding.io/web/notes/'+request.id, request);},
         delete: function (id) {return $http.delete('http://notes.eugenes.koding.io/web/notes/'+id);},
-        csv: function (id) {return $http.get('http://notes.eugenes.koding.io/web/notes/csv');},
-        mail: function (id) {return $http.get('http://notes.eugenes.koding.io/web/notes/mail');},
+        csv: function (id) {return $http.get('http://notes.eugenes.koding.io/web/notes/csv?id='+id);},
+        mail: function (request) {return $http.post('http://notes.eugenes.koding.io/web/notes/mail', request);}
     };
 });

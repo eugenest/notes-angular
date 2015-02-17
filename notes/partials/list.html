@@ -47,11 +47,11 @@
                             
                             <button class="btn btn-danger btn-xs" ng-click="deleteNote(element.id, $index)">&times;</button>
                             
-                            <a href="<?= Url::toRoute(['csv', 'id' => $note->id]); ?>" target="_blank">
-                                <button class="btn btn-primary btn-xs">CSV</button>
-                            </a>
+                            <button class="btn btn-primary btn-xs" ng-click="getCSV(element.id)">CSV</button>
                             
-                            <button class="btn btn-primary btn-xs">Mail</button>
+                            <a href="#/notes/{{element.id}}/mail">
+                                <button class="btn btn-primary btn-xs">Mail</button>
+                            </a>
                         </div>
                     </li>
                 </ul>
