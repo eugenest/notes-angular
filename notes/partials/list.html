@@ -1,13 +1,18 @@
 <div class="row">
     <div class="col-lg-12">
-        <h1 class="page-header">Notes</h1>
+        <h1 class="page-header">
+            Notes 
+            <a href="#/notes/add">
+                <button type="button" class="btn btn-primary">Add</button>
+            </a>
+        </h1>
     </div>
 </div>
 
 <div class="row" ng-show="elements.length == 0 || isThereNoElements">
     <div class="col-lg-12">
         <p class="alert alert-info">
-            Нет подключённых услуг.
+            There is no notes.
         </p>
     </div>
 </div>
@@ -18,73 +23,43 @@
     </div>
 </div>
 
-<span ng-if="currentUser" us-spinner spinner-key="elements-spinner" spinner-start-active="true"></span>
-<span ng-if="!currentUser" us-spinner spinner-key="elements-spinner"></span>
+<span us-spinner spinner-key="elements-spinner" spinner-start-active="true"></span>
 
 <div ng-show="isElementsLoaded && !isThereNoElements && !isServerError && elements.length > 0">
     <div class="row" ng-show="totalItems > itemsOnPage">
-        <div class="col-lg-12">
+        <div class="col-lg-6">
             <pagination total-items="totalItems" items-per-page="itemsOnPage" ng-model="currentPage" ng-init="currentPage = 1" class="pagination-sm"></pagination>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-lg-12">
-            <table class="table table-hover table-responsive">
-                <thead>
-                    <tr>
-                        <th width="100">Номер <a href="" ng-click="predicate = 'ID'; reverse=!reverse;"><i class="fa fa-sort"></i></a></th>
-                        <th>Название <a href="" ng-click="predicate = 'TariffPlan'; reverse=!reverse"><i class="fa fa-sort"></i></a></th>
-                        <th>Стоимость <a href="" ng-click="predicate = 'Price'; reverse=!reverse"><i class="fa fa-sort"></i></a></th>
-                        <th>Баланс <a href="" ng-click="predicate = 'Balance'; reverse=!reverse"><i class="fa fa-sort"></i></a></th>
-                        <th>Количество пользователей <a href="" ng-click="predicate = 'CountUsers'; reverse=!reverse"><i class="fa fa-sort"></i></a></th>
-                        <th>Скидка <a href="" ng-click="predicate = 'Discount'; reverse=!reverse"><i class="fa fa-sort"></i></a></th>
-                        <th>Сумма <a href="" ng-click="predicate = 'Amount'; reverse=!reverse"><i class="fa fa-sort"></i></a></th>
-                        <th colspan="3">Статус <a href="" ng-click="predicate = 'Status'; reverse=!reverse"><i class="fa fa-sort"></i></a></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="primary-service" class="row-clickable" ng-click="showDetailIncident(element.ID)" ng-repeat-start="element in elements | orderBy:predicate:reverse | startFrom:(currentPage-1)*itemsOnPage | limitTo: itemsOnPage">
-                        <td width="100"><a href="#/rent-1c/{{element.ID}}/edit">{{element.ID}}</a></td>
-                        <td>{{element.TariffPlan}}</td>
-                        <td>{{element.Price}}</td>
-                        <td>{{element.Balance || '0'}}</td>
-                        <td>{{element.CountUsers}}</td>
-                        <td>{{element.Discount}}</td>
-                        <td>{{element.Amount}}</td>
-                        <td ng-bind-html="element.Status | rent1c_service_status"></td>
-                        <td><a href="#/rent-1c/{{element.ID}}/edit">Изменить</a></td>
-                        <td>
-                            <button type="button" class="btn btn-primary btn-xs" disabled title="Удалённый запуск пока не доступен">
-                                <i class="fa fa-cloud-upload"></i> Запустить
-                            </button>
-                        </td>
-                    </tr>
-                    <tr ng-repeat="subElement in element.ServicesList.List">
-                        <td></td>
-                        <td>{{subElement.Name}}</td>
-                        <td colspan="2">{{subElement.Price}}</td>
-                        <td colspan="2">{{subElement.CountUsers}}</td>
-                        <td colspan="4">{{subElement.Amount}}</td>
-                    </tr>
-                    
-                    <tr ng-repeat-end></tr>
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="10">
-                            <a href="#/rent-1c/add">
-                                <button type="button" class="btn btn-success"><i class="fa fa-plus-circle"></i> Добавить</button>
+        <div class="col-lg-6">
+                <ul class="notes-list">
+                    <li ng-repeat="element in elements | orderBy:predicate:reverse | startFrom:(currentPage-1)*itemsOnPage | limitTo: itemsOnPage">
+                        <span>
+                            <a href="#/notes/{{element.id}}">{{element.title}} ({{element.author}})</a>
+                            <span ng-show="element.image">*</span>
+                        </span>
+                        <div class="notes-controls">
+                            <a href="#/notes/{{element.id}}/edit">
+                                <button class="btn btn-primary btn-xs">Edit</button>
                             </a>
-                        </td>
-                    </tr>
-                </tfoot>
-            </table>
+                            
+                            <button class="btn btn-danger btn-xs" ng-click="deleteNote(element.id, $index)">&times;</button>
+                            
+                            <a href="<?= Url::toRoute(['csv', 'id' => $note->id]); ?>" target="_blank">
+                                <button class="btn btn-primary btn-xs">CSV</button>
+                            </a>
+                            
+                            <button class="btn btn-primary btn-xs">Mail</button>
+                        </div>
+                    </li>
+                </ul>
         </div>
     </div>
     
     <div class="row">
-        <div class="col-lg-12">
+        <div class="col-lg-6">
             <pagination ng-show="totalItems > itemsOnPage" total-items="totalItems" items-per-page="itemsOnPage" ng-model="currentPage" ng-init="currentPage = 1" class="pagination-sm"></pagination>
         </div>
     </div>

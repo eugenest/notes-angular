@@ -1,0 +1,55 @@
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">
+            Note: {{element.title}}
+            <div class="notes-controls">
+                <a href="#/notes/{{element.id}}/edit">
+                    <button class="btn btn-primary btn-xs">Edit</button>
+                </a>
+                
+                <button class="btn btn-danger btn-xs" ng-click="deleteNote(element.id)">&times;</button>
+                
+                <a href="<?= Url::toRoute(['csv', 'id' => $note->id]); ?>" target="_blank">
+                    <button class="btn btn-primary btn-xs">CSV</button>
+                </a>
+                
+                <button class="btn btn-primary btn-xs">Mail</button>
+            </div>
+        </h1>
+    </div>
+</div>
+
+<div class="row" ng-show="isThereNoElements">
+    <div class="col-lg-12">
+        <p class="alert alert-info">
+            There is no notes.
+        </p>
+    </div>
+</div>
+
+<div class="row" ng-show="isServerError">
+    <div class="col-lg-12">
+        <server-error-alert></server-error-alert>
+    </div>
+</div>
+
+<span us-spinner spinner-key="elements-spinner" spinner-start-active="true"></span>
+
+<div ng-show="isElementsLoaded && !isThereNoElements && !isServerError && element">
+
+    <div class="row">
+        <div class="col-lg-12">
+            <p>
+                <span>{{element.title}} ({{element.author}})</span>
+            </p>
+            <p>
+                <span>{{element.create_date | date}}</span>
+            </p>
+            <p>
+                {{element.description | date}}
+            </p>
+            <img ng-show="element.image" src="http://notes.eugenes.koding.io/{{element.image}}"/>
+        </div>
+    </div>
+
+</div>

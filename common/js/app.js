@@ -13,6 +13,7 @@ var app = angular.module('notes', [
 app.config(['$routeProvider', function($routeProvider) { 
     $routeProvider.when('/notes', {templateUrl: 'notes/partials/list.html', controller: 'NotesCtrl'});
     $routeProvider.when('/notes/add', {templateUrl: 'notes/partials/add.html', controller: 'NotesAddCtrl'});
+    $routeProvider.when('/notes/:id', {templateUrl: 'notes/partials/detail.html', controller: 'NotesDetailCtrl'});
     $routeProvider.when('/notes/:id/edit', {templateUrl: 'notes/partials/edit.html', controller: 'NotesEditCtrl'});
 
     $routeProvider.when('/404', {templateUrl: 'common/partials/404.html', controller: '404Ctrl'});
@@ -22,7 +23,7 @@ app.config(['$routeProvider', function($routeProvider) {
 }]);
 
 app.run(function(paginationConfig){
-    paginationConfig.itemsPerPage   = 20;
+    paginationConfig.itemsPerPage   = 5;
     paginationConfig.previousText   = "‹";
     paginationConfig.nextText       = "›";
     paginationConfig.firstText      = "«";
