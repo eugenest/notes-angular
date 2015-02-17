@@ -8,6 +8,7 @@ var app = angular.module('notes', [
     'notes.controllers',
     'ui.bootstrap',
     'angularSpinner',
+    'angularFileUpload'
 ]);
 
 app.config(['$routeProvider', function($routeProvider) { 

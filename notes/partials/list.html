@@ -26,12 +26,6 @@
 <span us-spinner spinner-key="elements-spinner" spinner-start-active="true"></span>
 
 <div ng-show="isElementsLoaded && !isThereNoElements && !isServerError && elements.length > 0">
-    <div class="row" ng-show="totalItems > itemsOnPage">
-        <div class="col-lg-6">
-            <pagination total-items="totalItems" items-per-page="itemsOnPage" ng-model="currentPage" ng-init="currentPage = 1" class="pagination-sm"></pagination>
-        </div>
-    </div>
-
     <div class="row">
         <div class="col-lg-6">
                 <ul class="notes-list">
@@ -45,7 +39,7 @@
                                 <button class="btn btn-primary btn-xs">Edit</button>
                             </a>
                             
-                            <button class="btn btn-danger btn-xs" ng-click="deleteNote(element.id, $index)">&times;</button>
+                            <button class="btn btn-danger btn-xs" ng-click="deleteNote(element.id)">&times;</button>
                             
                             <button class="btn btn-primary btn-xs" ng-click="getCSV(element.id)">CSV</button>
                             

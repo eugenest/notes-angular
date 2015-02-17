@@ -35,7 +35,8 @@ gulp.task('js-vendor-minify', function(){
       './bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js',
       './bower_components/spin.js/spin.js',
       './bower_components/angular-spinner/angular-spinner.min.js',
-      './bower_components/angular-i18n/angular-locale_ru-ru.js'
+      './bower_components/angular-i18n/angular-locale_ru-ru.js',
+      './bower_components/ng-file-upload/angular-file-upload-all.min.js'
       ])
     .pipe(concat('vendor.js'))
     .pipe(size())

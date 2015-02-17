@@ -8,6 +8,7 @@ var app = angular.module('notes', [
     'notes.controllers',
     'ui.bootstrap',
     'angularSpinner',
+    'angularFileUpload'
 ]);
 
 app.config(['$routeProvider', function($routeProvider) { 
@@ -73,38 +74,42 @@ appFilters.filter('startFrom', function() {
 appControllers.controller('NotesCtrl', ['$scope', 'Notes', 'paginationConfig', '$location', 'usSpinnerService', function($scope, Notes, paginationConfig, $location, usSpinnerService) {
     $scope.itemsOnPage = paginationConfig.itemsPerPage;
     
-    $scope.isThereNoElements = false;
-    $scope.isServerError = false;
-    usSpinnerService.spin('elements-spinner');
-    Notes.getAll().success(function(response, status){
-        switch(status) {
-            case 204:
-                $scope.isThereNoElements = true;
-                break;
-            case 200:
-                $scope.elements = response;
-                $scope.totalItems = $scope.elements.length;
-                break;
-            default:
-                break;
-        }
-    }).error(function(response, status){
-        switch (status){
-            case 502:
-            case 500:
-            default: $scope.isServerError = true;
-        }
-    }).finally(function(){
-        usSpinnerService.stop('elements-spinner');
-        $scope.isElementsLoaded = true;
+    $scope.$on('loadNotes', function(){
+        $scope.isThereNoElements = false;
+        $scope.isServerError = false;
+        usSpinnerService.spin('elements-spinner');
+        Notes.getAll().success(function(response, status){
+            switch(status) {
+                case 204:
+                    $scope.isThereNoElements = true;
+                    break;
+                case 200:
+                    $scope.elements = response;
+                    $scope.totalItems = $scope.elements.length;
+                    break;
+                default:
+                    break;
+            }
+        }).error(function(response, status){
+            switch (status){
+                case 502:
+                case 500:
+                default: $scope.isServerError = true;
+            }
+        }).finally(function(){
+            usSpinnerService.stop('elements-spinner');
+            $scope.isElementsLoaded = true;
+        });
     });
     
-    $scope.deleteNote = function(id, index) {
+    $scope.$emit('loadNotes');
+    
+    $scope.deleteNote = function(id) {
         Notes.delete(id).success(function(){
-            $scope.elements.splice(index, 1);
+            $scope.$emit('loadNotes');
         }).error(function(){
             
-        }); 
+        });
     }
     
     $scope.getCSV = function(id) {
@@ -185,8 +190,9 @@ appControllers.controller('NotesDetailCtrl', ['$scope', 'Notes', 'paginationConf
     }
 }]);
 
-appControllers.controller('NotesAddCtrl', ['$scope', 'Notes', 'paginationConfig', '$rootScope', '$location', 'usSpinnerService', function($scope, Notes, paginationConfig, $rootScope, $location, usSpinnerService) {
+appControllers.controller('NotesAddCtrl', ['$scope', 'Notes', 'paginationConfig', '$rootScope', '$location', 'usSpinnerService', '$upload', function($scope, Notes, paginationConfig, $rootScope, $location, usSpinnerService, $upload) {
     $scope.isNoteAdded = true;
+    $scope.element = {};
      
     $scope.addNote = function() {
         $scope.isNoteAdded = false;
@@ -198,12 +204,30 @@ appControllers.controller('NotesAddCtrl', ['$scope', 'Notes', 'paginationConfig'
             $scope.isNoteAddServerError = true;
         }).finally(function(){
             $scope.isNoteAdded = true;
-            $scope.element = null;
+            $scope.element = {};
         }); 
     }
+
+    $scope.upload = function (files) {
+        if (files && files.length) {
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                $upload.upload({
+                    url: 'common/back/upload.php', 
+                    file: file
+                }).progress(function (evt) {
+                    var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
+                    //console.log('progress: ' + progressPercentage + '% ' + evt.config.file.name);
+                }).success(function (data, status, headers, config) {
+                    $scope.element.image = '/upload/' + config.file.name;
+                    console.log('File ' + config.file.name + ' uploaded.');
+                });
+            }
+        }
+    };
 }]);
 
-appControllers.controller('NotesEditCtrl', ['$scope', 'Notes', 'paginationConfig', '$location', '$routeParams', 'usSpinnerService', '$filter', function($scope, Notes, paginationConfig, $location, $routeParams, usSpinnerService, $filter) {
+appControllers.controller('NotesEditCtrl', ['$scope', 'Notes', 'paginationConfig', '$location', '$routeParams', 'usSpinnerService', '$filter', '$upload', function($scope, Notes, paginationConfig, $location, $routeParams, usSpinnerService, $filter, $upload) {
     $scope.isNoteEdited = true;
     $scope.isThereNoElements = false;
     $scope.isServerError = false;
@@ -242,6 +266,22 @@ appControllers.controller('NotesEditCtrl', ['$scope', 'Notes', 'paginationConfig
             $scope.isNoteEdited = true;
         }); 
     }
+    
+    $scope.upload = function (files) {
+        if (files && files.length) {
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                $upload.upload({
+                    url: 'common/back/upload.php', 
+                    file: file
+                }).progress(function (evt) {
+                }).success(function (data, status, headers, config) {
+                    $scope.element.image = '/upload/' + config.file.name;
+                    //console.log('File ' + config.file.name + ' uploaded.');
+                });
+            }
+        }
+    };
 }]);
 
 appControllers.controller('NotesMailCtrl', ['$scope', '$routeParams', 'Notes', 'paginationConfig', '$rootScope', '$location', 'usSpinnerService', function($scope, $routeParams, Notes, paginationConfig, $rootScope, $location, usSpinnerService) {
@@ -269,6 +309,17 @@ appServices.factory('Notes', function($http){
         edit: function (request) {return $http.put('http://notes.eugenes.koding.io/web/notes/'+request.id, request);},
         delete: function (id) {return $http.delete('http://notes.eugenes.koding.io/web/notes/'+id);},
         csv: function (id) {return $http.get('http://notes.eugenes.koding.io/web/notes/csv?id='+id);},
-        mail: function (request) {return $http.post('http://notes.eugenes.koding.io/web/notes/mail', request);}
+        //mail: function (request) {return $http.post('http://notes.eugenes.koding.io/web/notes/mail', request);} //doesn't works
+        mail: function (request) {
+            return $http({
+                method: 'POST',
+                url: 'http://notes.eugenes.koding.io/web/notes/mail',
+                data: request,
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                    'Accept' : '*/*'
+                }
+            });
+        }
     };
 });
