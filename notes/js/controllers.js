@@ -34,29 +34,12 @@ appControllers.controller('NotesCtrl', ['$scope', 'Notes', 'paginationConfig', '
     $scope.deleteNote = function(id) {
         Notes.delete(id).success(function(){
             $scope.$emit('loadNotes');
-        }).error(function(){
-            
         });
     }
     
     $scope.getCSV = function(id) {
         Notes.csv(id).success(function(response){
-            /*var file = new Blob([response], {type: 'text/csv'}); //blocks by browser
-            var fileURL = URL.createObjectURL(file);
-            window.open(fileURL);*/
-            
-            var a = document.createElement("a");
-            document.body.appendChild(a);
-            a.style = "display: none";
-            var blob = new Blob([response], {type: 'text/csv'});
-            var url = window.URL.createObjectURL(blob);
-            a.href = url;
-            a.download = 'note_'+id+'.csv';
-            a.click();
-            window.URL.revokeObjectURL(url);
-            
-        }).error(function(){
-            
+            $scope.$emit('openBlob', response, id);
         }); 
     }
 }]);
@@ -90,29 +73,12 @@ appControllers.controller('NotesDetailCtrl', ['$scope', 'Notes', 'paginationConf
     $scope.deleteNote = function(id) {
         Notes.delete(id).success(function(){
             $location.path('/notes', false);
-        }).error(function(){
-            
         }); 
     }
     
     $scope.getCSV = function(id) {
         Notes.csv(id).success(function(response){
-            /*var file = new Blob([response], {type: 'text/csv'}); //blocks by browser
-            var fileURL = URL.createObjectURL(file);
-            window.open(fileURL);*/
-            
-            var a = document.createElement("a");
-            document.body.appendChild(a);
-            a.style = "display: none";
-            var blob = new Blob([response], {type: 'text/csv'});
-            var url = window.URL.createObjectURL(blob);
-            a.href = url;
-            a.download = 'note_'+id+'.csv';
-            a.click();
-            window.URL.revokeObjectURL(url);
-            
-        }).error(function(){
-            
+            $scope.$emit('openBlob', response, id);
         }); 
     }
 }]);
